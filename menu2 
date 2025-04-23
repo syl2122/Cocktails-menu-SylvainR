@@ -1,0 +1,181 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sylvain's Tropical Cocktail Menu</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: url('https://www.transparenttextures.com/patterns/sandpaper.png');
+      background-color: #fff9f0;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #ffe6b3;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .tab-button {
+      background-color: #ffcc80;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 10px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    .tab-button.active,
+    .tab-button:hover {
+      background-color: #ffa726;
+    }
+    .cocktail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .cocktail-card {
+      background-color: #ffffffcc;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+      perspective: 1000px;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .cocktail-card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 320px;
+      text-align: center;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+    }
+    .cocktail-card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    .card-front img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .card-back {
+      background-color: #fff3e0;
+      color: #333;
+      padding: 20px;
+      transform: rotateY(180deg);
+      overflow-y: auto;
+    }
+    .card-back h3 {
+      margin-top: 0;
+    }
+    .card-back ul {
+      padding-left: 15px;
+      text-align: left;
+      margin-bottom: 10px;
+    }
+    .tips {
+      font-size: 0.9em;
+      font-style: italic;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sylvain's Tropical Cocktail Menu</h1>
+  </header>
+  <div class="tabs" id="tabs"></div>
+  <div class="cocktail-grid" id="cocktailGrid"></div>  <script>
+    const categories = ["All", "Martinis", "Mules", "Shots", "Tropical", "Creamy"];
+    const cocktails = [
+      { name: "Espresso Baileys Martini", category: "Martinis", ingredients: ["Vodka: 45ml", "Coffee: 30ml", "Baileys: 30ml", "Vanilla Syrup: 10ml"], tips: "Serve in a chilled martini glass. Garnish with 3 coffee beans.", image: "https://source.unsplash.com/featured/?espresso,martini" },
+      { name: "Milkshake Vanilla Martini", category: "Creamy", ingredients: ["Vodka: 45ml", "Baileys: 30ml", "Coconut Purée: 30ml", "Caramel Syrup: 5ml"], tips: "Top with whipped cream or toasted coconut.", image: "https://source.unsplash.com/featured/?vanilla,martini" },
+      { name: "Pornstar Martini", category: "Martinis", ingredients: ["Vodka: 45ml", "Passionfruit Purée: 30ml", "Vanilla Syrup: 15ml", "Lime Juice: 10ml"], tips: "Serve with a Prosecco shot on the side.", image: "https://source.unsplash.com/featured/?passionfruit,martini" },
+      { name: "Moscow Mule", category: "Mules", ingredients: ["Vodka: 45ml", "Ginger Beer: Top", "Lemon Juice: 15ml"], tips: "Serve in a copper mug with a lemon wheel.", image: "https://source.unsplash.com/featured/?moscow,mule" },
+      { name: "London Mule", category: "Mules", ingredients: ["Gin: 45ml", "Ginger Beer: Top", "Lime Juice: 15ml"], tips: "Serve in a copper mug with lime wedge and mint.", image: "https://source.unsplash.com/featured/?london,mule" },
+      { name: "Mexican Mule", category: "Mules", ingredients: ["Tequila: 45ml", "Ginger Beer: Top", "Lime Juice: 15ml"], tips: "Add a chili rim for extra kick.", image: "https://source.unsplash.com/featured/?mexican,mule" },
+      { name: "Caribbean Mule", category: "Mules", ingredients: ["Rum: 45ml", "Ginger Beer: Top", "Lime Juice: 15ml"], tips: "Garnish with pineapple and mint.", image: "https://source.unsplash.com/featured/?caribbean,mule" },
+      { name: "Spicy Mule", category: "Mules", ingredients: ["Vodka: 45ml", "Chili: 2 slices", "Lime Juice: 15ml", "Ginger Beer: Top"], tips: "Muddle chili with lime for spicier kick.", image: "https://source.unsplash.com/featured/?spicy,drink" },
+      { name: "Lychee Martini", category: "Martinis", ingredients: ["Vodka: 45ml", "Lychee Juice: 30ml", "Lime Juice: 10ml"], tips: "Garnish with a skewered lychee.", image: "https://source.unsplash.com/featured/?lychee,martini" },
+      { name: "Passionfruit Martini", category: "Martinis", ingredients: ["Vodka: 45ml", "Passionfruit Purée: 30ml", "Vanilla Syrup: 15ml", "Lime Juice: 10ml"], tips: "Float a half passionfruit on top.", image: "https://source.unsplash.com/featured/?tropical,martini" },
+      { name: "White Russian", category: "Creamy", ingredients: ["Vodka: 45ml", "Coffee Liqueur: 30ml", "Cream: 30ml"], tips: "Float cream for a dramatic swirl.", image: "https://source.unsplash.com/featured/?white,russian" },
+      { name: "Blue Lagoon", category: "Tropical", ingredients: ["Vodka: 40ml", "Blue Curaçao: 20ml", "Lemonade: 40ml"], tips: "Serve over crushed ice with an orange slice.", image: "https://source.unsplash.com/featured/?blue,cocktail" },
+      { name: "Mai Tai", category: "Tropical", ingredients: ["White Rum: 30ml", "Dark Rum: 30ml", "Orange Curaçao: 15ml", "Lime Juice: 20ml", "Orgeat: 10ml"], tips: "Garnish with mint and pineapple wedge.", image: "https://source.unsplash.com/featured/?mai,tai" },
+    ];
+
+    const tabsContainer = document.getElementById("tabs");
+    const grid = document.getElementById("cocktailGrid");
+
+    function renderTabs() {
+      categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = "tab-button";
+        btn.innerText = cat;
+        btn.onclick = () => filterCategory(cat);
+        tabsContainer.appendChild(btn);
+      });
+    }
+
+    function filterCategory(category) {
+      document.querySelectorAll(".tab-button").forEach(btn => {
+        btn.classList.toggle("active", btn.innerText === category);
+      });
+      const filtered = category === "All" ? cocktails : cocktails.filter(c => c.category === category);
+      renderCocktails(filtered);
+    }
+
+    function renderCocktails(cocktailList) {
+      grid.innerHTML = "";
+      cocktailList.forEach(cocktail => {
+        const card = document.createElement("div");
+        card.className = "cocktail-card";
+        card.onclick = () => card.classList.toggle("flipped");
+
+        const inner = document.createElement("div");
+        inner.className = "card-inner";
+
+        const front = document.createElement("div");
+        front.className = "card-front";
+        front.innerHTML = `<img src="${cocktail.image}" alt="${cocktail.name}">`;
+
+        const back = document.createElement("div");
+        back.className = "card-back";
+        back.innerHTML = `<h3>${cocktail.name}</h3><ul>${cocktail.ingredients.map(i => `<li>${i}</li>`).join('')}</ul><p class="tips">${cocktail.tips}</p>`;
+
+        inner.appendChild(front);
+        inner.appendChild(back);
+        card.appendChild(inner);
+        grid.appendChild(card);
+      });
+    }
+
+    renderTabs();
+    filterCategory("All");
+  </script></body>
+</html>
